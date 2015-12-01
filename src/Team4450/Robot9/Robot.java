@@ -38,11 +38,10 @@ public class Robot extends SampleRobot
   final Joystick		launchPad = new Joystick(3);
   final Joystick		gamePad = new Joystick(4);
   final Compressor		compressor = new Compressor(0);
-  final Gyro			gyro = new Gyro(0);
 
   public Properties		robotProperties;
 	
-  AxisCamera			camera = null;
+  //AxisCamera			camera = null;
   CameraServer			usbCameraServer = null;
 
   DriverStation         ds = null;

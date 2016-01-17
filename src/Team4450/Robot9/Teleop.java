@@ -6,16 +6,16 @@ import java.lang.Math;
 import Team4450.Lib.*;
 import Team4450.Lib.JoyStick.*;
 import Team4450.Lib.LaunchPad.*;
-
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 class Teleop
 {
-	private final Robot robot;
-	private double		powerFactor = 1.0;
-	private JoyStick	rightStick, leftStick, utilityStick;
-	private LaunchPad	launchPad;
+	private final Robot 	robot;
+	private double			powerFactor = 1.0;
+	private JoyStick		rightStick, leftStick, utilityStick;
+	private LaunchPad		launchPad;
+	private final FestoDA	shifterValve;
 	
 	// Constructor.
 	
@@ -24,6 +24,10 @@ class Teleop
 		Util.consoleLog();
 
 		this.robot = robot;
+		
+		shifterValve = new FestoDA(1);
+		
+		shifterClose();
 	}
 
 	// Free all objects that need it.
@@ -36,6 +40,7 @@ class Teleop
 		if (rightStick != null) rightStick.dispose();
 		if (utilityStick != null) utilityStick.dispose();
 		if (launchPad != null) launchPad.dispose();
+		if (shifterValve != null) shifterValve.dispose();
 	}
 
 	void OperatorControl()
@@ -59,6 +64,7 @@ class Teleop
 		lpControl.controlType = LaunchPadControlTypes.SWITCH;
 		launchPad.AddControl(LaunchPadControlIDs.BUTTON_ONE);
 		launchPad.AddControl(LaunchPadControlIDs.BUTTON_EIGHT);
+		launchPad.AddControl(LaunchPadControlIDs.BUTTON_YELLOW);
         launchPad.addLaunchPadEventListener(new LaunchPadListener());
         launchPad.Start();
 
@@ -109,6 +115,20 @@ class Teleop
 		Util.consoleLog("end");
 	}
 
+	void shifterClose()
+	{
+		Util.consoleLog();
+		
+		shifterValve.Close();
+	}
+
+	void shifterOpen()
+	{
+		Util.consoleLog();
+		
+		shifterValve.Open();
+	}
+
 	// Handle LaunchPad control events.
 	
 	public class LaunchPadListener implements LaunchPadEventListener 
@@ -136,6 +156,12 @@ class Teleop
 				((Teleop) launchPadEvent.getSource()).powerFactor = 0.5;
 				SmartDashboard.putNumber("Power Factor", ((Teleop) launchPadEvent.getSource()).powerFactor * 100);
 			}
+
+			if (launchPadEvent.control.id == LaunchPadControlIDs.BUTTON_YELLOW)
+    			if (launchPadEvent.control.latchedState)
+    				shifterOpen();
+    			else
+    				shifterClose();
 	    }
 	    
 	    public void ButtonUp(LaunchPadEvent launchPadEvent) 

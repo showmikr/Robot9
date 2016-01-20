@@ -1,6 +1,6 @@
 // 2016 competition robot code.
 // Cleaned up and reorganized in preparation for 2016.
-// For Robot "tba" built for FRC game "tba".
+// For Robot "tba" built for FRC game "First Stronghold".
 
 package Team4450.Robot9;
 
@@ -17,6 +17,7 @@ import edu.wpi.first.wpilibj.SampleRobot;
 import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.PowerDistributionPanel;
+import edu.wpi.first.wpilibj.CANTalon;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -27,10 +28,14 @@ import edu.wpi.first.wpilibj.PowerDistributionPanel;
 
 public class Robot extends SampleRobot 
 {
-  static final String  	PROGRAM_NAME = "ORF9-01.16.16-01";
+  static final String  	PROGRAM_NAME = "RAC9-01.16.16-01";
 
-  // Motor pwm port assignments (0=front-left, 1=rear-left, 2=front-right, 3=rear-right)
-  final RobotDrive      robotDrive = new RobotDrive(0,1,2,3);
+  // Motor CAN ID assignments (1=left-front, 2=left-rear, 3=right-front, 4=right-rear)
+  final CANTalon		LFTalon = new CANTalon(1);
+  final CANTalon		LRTalon = new CANTalon(2);
+  final CANTalon		RFTalon = new CANTalon(3);
+  final CANTalon		RRTalon = new CANTalon(4);
+  final RobotDrive      robotDrive = new RobotDrive(LFTalon, LRTalon, RFTalon, RRTalon);
   final Joystick        utilityStick = new Joystick(2);	// 0 old ds configuration
   final Joystick        leftStick = new Joystick(0);	// 1
   final Joystick        rightStick = new Joystick(1);	// 2

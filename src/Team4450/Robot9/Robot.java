@@ -28,7 +28,7 @@ import edu.wpi.first.wpilibj.CANTalon;
 
 public class Robot extends SampleRobot 
 {
-  static final String  	PROGRAM_NAME = "RAC9-01.16.16-01";
+  static final String  	PROGRAM_NAME = "RAC9-01.20.16-01";
 
   // Motor CAN ID assignments (1=left-front, 2=left-rear, 3=right-front, 4=right-rear)
   final CANTalon		LFTalon = new CANTalon(1);
@@ -81,7 +81,14 @@ public class Robot extends SampleRobot
     		
         // IP Camera object used for vision processing.
         //camera = AxisCamera.getInstance(CAMERA_IP);
-    		
+        
+        // Write CANTalong status to log so we can verify all the
+        // talons are connected.
+        LogCANTalonStatus(LFTalon);
+        LogCANTalonStatus(LRTalon);
+        LogCANTalonStatus(RFTalon);
+        LogCANTalonStatus(RRTalon);
+        
         robotDrive.setInvertedMotor(RobotDrive.MotorType.kFrontLeft, true);
         robotDrive.setInvertedMotor(RobotDrive.MotorType.kRearLeft, true);
     
@@ -144,7 +151,7 @@ public class Robot extends SampleRobot
    		
    		//monitorDistanceThread = new MonitorDistanceMBX(this);
    		//monitorDistanceThread.start();
-            
+   		
    		Util.consoleLog("end");
     }
     catch (Throwable e) {e.printStackTrace(Util.logPrintStream);}
@@ -251,5 +258,13 @@ public class Robot extends SampleRobot
 	  usbCameraServer = CameraServer.getInstance();
       usbCameraServer.setQuality(30);
       usbCameraServer.startAutomaticCapture(cameraName);
+  }
+
+  // Log status indication from CANTalon. If we see an exception or a talon has low
+  // voltage value, it did not get recognized by the RR on start up.
+  
+  public void LogCANTalonStatus(CANTalon talon)
+  {
+	  Util.consoleLog("talon check: %s   voltage=%.1f", talon.getDescription(), talon.getBusVoltage());
   }
 }

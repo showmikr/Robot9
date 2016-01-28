@@ -8,13 +8,13 @@ import java.io.IOException;
 import java.util.Properties;
 
 import Team4450.Lib.*;
-
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.RobotDrive;
 import edu.wpi.first.wpilibj.SampleRobot;
 import edu.wpi.first.wpilibj.CameraServer;
+import edu.wpi.first.wpilibj.CANTalon.TalonControlMode;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.PowerDistributionPanel;
 import edu.wpi.first.wpilibj.CANTalon;
@@ -28,7 +28,7 @@ import edu.wpi.first.wpilibj.CANTalon;
 
 public class Robot extends SampleRobot 
 {
-  static final String  	PROGRAM_NAME = "RAC9-01.20.16-01";
+  static final String  	PROGRAM_NAME = "RAC9-01.27.16-01";
 
   // Motor CAN ID assignments (1=left-front, 2=left-rear, 3=right-front, 4=right-rear)
   final CANTalon		LFTalon = new CANTalon(1);
@@ -82,12 +82,12 @@ public class Robot extends SampleRobot
         // IP Camera object used for vision processing.
         //camera = AxisCamera.getInstance(CAMERA_IP);
         
-        // Write CANTalong status to log so we can verify all the
-        // talons are connected.
-        LogCANTalonStatus(LFTalon);
-        LogCANTalonStatus(LRTalon);
-        LogCANTalonStatus(RFTalon);
-        LogCANTalonStatus(RRTalon);
+        // Initialize CAN Talons and write status to log so we can verify
+        // all the talons are connected.
+        initializeCANTalon(LFTalon);
+        initializeCANTalon(LRTalon);
+        initializeCANTalon(RFTalon);
+        initializeCANTalon(RRTalon);
         
         robotDrive.setInvertedMotor(RobotDrive.MotorType.kFrontLeft, true);
         robotDrive.setInvertedMotor(RobotDrive.MotorType.kRearLeft, true);
@@ -260,11 +260,15 @@ public class Robot extends SampleRobot
       usbCameraServer.startAutomaticCapture(cameraName);
   }
 
-  // Log status indication from CANTalon. If we see an exception or a talon has low
-  // voltage value, it did not get recognized by the RR on start up.
+  // Initialize and Log status indication from CANTalon. If we see an exception
+  // or a talon has low voltage value, it did not get recognized by the RR on start up.
   
-  public void LogCANTalonStatus(CANTalon talon)
+  public void initializeCANTalon(CANTalon talon)
   {
-	  Util.consoleLog("talon check: %s   voltage=%.1f", talon.getDescription(), talon.getBusVoltage());
+	  Util.consoleLog("talon init: %s   voltage=%.1f", talon.getDescription(), talon.getBusVoltage());
+
+	  talon.clearStickyFaults();
+	  talon.enableControl();
+	  talon.changeControlMode(TalonControlMode.PercentVbus);
   }
 }

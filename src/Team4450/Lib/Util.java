@@ -208,11 +208,7 @@ public class Util
     
         try
         {
-<<<<<<< HEAD
         	return stackTrace[level].toString().split("Robot8")[1];
-=======
-        	return stackTrace[level].toString().split("Robot9.")[1];
->>>>>>> 3f96463b80ae138e6eea04cb4543470b8f22ff94
         }
         catch (Throwable e)
         {

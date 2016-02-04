@@ -28,14 +28,15 @@ import edu.wpi.first.wpilibj.CANTalon;
 
 public class Robot extends SampleRobot 
 {
-  static final String  	PROGRAM_NAME = "RAC9-01.27.16-01";
+  static final String  	PROGRAM_NAME = "RAC9-02.04.16-01";
 
   // Motor CAN ID assignments (1=left-front, 2=left-rear, 3=right-front, 4=right-rear)
   final CANTalon		LFTalon = new CANTalon(1);
-  final CANTalon		LRTalon = new CANTalon(2);
+  //final CANTalon		LRTalon = new CANTalon(2);
   final CANTalon		RFTalon = new CANTalon(3);
-  final CANTalon		RRTalon = new CANTalon(4);
-  final RobotDrive      robotDrive = new RobotDrive(LFTalon, LRTalon, RFTalon, RRTalon);
+  //final CANTalon		RRTalon = new CANTalon(4);
+  //final RobotDrive      robotDrive = new RobotDrive(LFTalon, LRTalon, RFTalon, RRTalon);
+  final RobotDrive      robotDrive = new RobotDrive(LFTalon, RFTalon);
   final Joystick        utilityStick = new Joystick(2);	// 0 old ds configuration
   final Joystick        leftStick = new Joystick(0);	// 1
   final Joystick        rightStick = new Joystick(1);	// 2
@@ -78,22 +79,25 @@ public class Robot extends SampleRobot
         robotDrive.setExpiration(0.1);
     
         ds = DriverStation.getInstance();
-    		
+
         // IP Camera object used for vision processing.
         //camera = AxisCamera.getInstance(CAMERA_IP);
-        
+
         // Initialize CAN Talons and write status to log so we can verify
         // all the talons are connected.
         initializeCANTalon(LFTalon);
-        initializeCANTalon(LRTalon);
+        //initializeCANTalon(LRTalon);
         initializeCANTalon(RFTalon);
-        initializeCANTalon(RRTalon);
+        //initializeCANTalon(RRTalon);
         
-        robotDrive.setInvertedMotor(RobotDrive.MotorType.kFrontLeft, true);
-        robotDrive.setInvertedMotor(RobotDrive.MotorType.kRearLeft, true);
+        LFTalon.setInverted(true);
+        RFTalon.setInverted(true);
+        
+        //robotDrive.setInvertedMotor(RobotDrive.MotorType.kFrontLeft, true);
+        //robotDrive.setInvertedMotor(RobotDrive.MotorType.kRearLeft, true);
     
-        robotDrive.setInvertedMotor(RobotDrive.MotorType.kFrontRight, true);
-        robotDrive.setInvertedMotor(RobotDrive.MotorType.kRearRight, true);
+        //robotDrive.setInvertedMotor(RobotDrive.MotorType.kFrontRight, true);
+        //robotDrive.setInvertedMotor(RobotDrive.MotorType.kRearRight, true);
       	
         Util.consoleLog("%s %s", PROGRAM_NAME, "end");
     }

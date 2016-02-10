@@ -19,6 +19,7 @@ import edu.wpi.first.wpilibj.CANTalon.TalonControlMode;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.PowerDistributionPanel;
 import edu.wpi.first.wpilibj.CANTalon;
+import edu.wpi.first.wpilibj.Talon;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -29,20 +30,18 @@ import edu.wpi.first.wpilibj.CANTalon;
 
 public class Robot extends SampleRobot 
 {
-  static final String  	PROGRAM_NAME = "SR9-01.27.16-01";
+  static final String  	PROGRAM_NAME = "SR9-02.10.16-01";
 
-  // Motor CAN ID assignments (1=left-front, 2=left-rear, 3=right-front, 4=right-rear)
-  final CANTalon		LFTalon = new CANTalon(1);
-  final CANTalon		LRTalon = new CANTalon(2);
-  final CANTalon		RFTalon = new CANTalon(3);
-  final CANTalon		RRTalon = new CANTalon(4);
-  final CANTalon		LSlaveTalon = new CANTalon(5);
-  final CANTalon		RSlaveTalon = new CANTalon(6);
-  final RobotDrive      robotDrive = new RobotDrive(LFTalon, LRTalon, RFTalon, RRTalon);
+  // Motor CAN ID/PWM port assignments (1=left-front, 2=left-rear, 3=right-front, 4=right-rear)
+  CANTalon				LFCanTalon, LRCanTalon, RFCanTalon, RRCanTalon, LSlaveCanTalon, RSlaveCanTalon;
+  Talon					LFPwmTalon, LRPwmTalon, RFPwmTalon, RRPwmTalon;
+  RobotDrive      		robotDrive;
+  
   final Joystick        utilityStick = new Joystick(2);	// 0 old ds configuration
   final Joystick        leftStick = new Joystick(0);	// 1
   final Joystick        rightStick = new Joystick(1);	// 2
   final Joystick		launchPad = new Joystick(3);
+  
   final Compressor		compressor = new Compressor(0);
 
   public Properties		robotProperties;
@@ -75,39 +74,11 @@ public class Robot extends SampleRobot
     try
     {
     	Util.consoleLog(PROGRAM_NAME);
-
-        robotDrive.stopMotor();
-    
-        robotDrive.setExpiration(0.1);
     
         ds = DriverStation.getInstance();
 
         // IP Camera object used for vision processing.
         //camera = AxisCamera.getInstance(CAMERA_IP);
-
-        // Initialize CAN Talons and write status to log so we can verify
-        // all the talons are connected.
-        initializeCANTalon(LFTalon);
-        initializeCANTalon(LRTalon);
-        initializeCANTalon(RFTalon);
-        initializeCANTalon(RRTalon);
-        initializeCANTalon(LSlaveTalon);
-        initializeCANTalon(RSlaveTalon);
-        
-        // Configure slave CAN Talons to follow the front L & R Talons.
-        LSlaveTalon.changeControlMode(TalonControlMode.Follower);
-        LSlaveTalon.set(LFTalon.getDeviceID());
-
-        RSlaveTalon.changeControlMode(TalonControlMode.Follower);
-        RSlaveTalon.set(RFTalon.getDeviceID());
-        
-        // Reverse motors to they all turn on the right direction to match "forward"
-        // as we define it for the robot.
-        robotDrive.setInvertedMotor(RobotDrive.MotorType.kFrontLeft, true);
-        robotDrive.setInvertedMotor(RobotDrive.MotorType.kRearLeft, true);
-    
-        robotDrive.setInvertedMotor(RobotDrive.MotorType.kFrontRight, true);
-        robotDrive.setInvertedMotor(RobotDrive.MotorType.kRearRight, true);
       	
         Util.consoleLog("%s %s", PROGRAM_NAME, "end");
     }
@@ -128,6 +99,7 @@ public class Robot extends SampleRobot
    		robotProperties = Util.readProperties();
       
    		SmartDashboard.putString("Program", PROGRAM_NAME);
+   		
    		//SmartDashboard.putBoolean("CompressorEnabled", false);
    		SmartDashboard.putBoolean("CompressorEnabled", Boolean.parseBoolean(robotProperties.getProperty("CompressorEnabledByDefault")));
 
@@ -135,6 +107,26 @@ public class Robot extends SampleRobot
       
    		PowerDistributionPanel PDP = new PowerDistributionPanel();
    		PDP.clearStickyFaults();
+
+   		// Configure motor controllers and RobotDrive.
+        // Competition robot uses CAN Talons clone uses PWM Talons.
+   		
+		if (robotProperties.getProperty("RobotId").equals("comp")) 
+			InitializeCANTalonDrive();
+		else
+			InitializePWMTalonDrive();
+		
+        robotDrive.stopMotor();
+    
+        robotDrive.setExpiration(0.1);
+        
+        // Reverse motors so they all turn on the right direction to match "forward"
+        // as we define it for the robot.
+        robotDrive.setInvertedMotor(RobotDrive.MotorType.kFrontLeft, true);
+        robotDrive.setInvertedMotor(RobotDrive.MotorType.kRearLeft, true);
+    
+        robotDrive.setInvertedMotor(RobotDrive.MotorType.kFrontRight, true);
+        robotDrive.setInvertedMotor(RobotDrive.MotorType.kRearRight, true);
      
    		// Set starting camera feed on driver station to USB-HW.
       
@@ -274,10 +266,52 @@ public class Robot extends SampleRobot
       usbCameraServer.startAutomaticCapture(cameraName);
   }
 
+  private void InitializeCANTalonDrive()
+  {
+	  Util.consoleLog();
+
+	  LFCanTalon = new CANTalon(1);
+	  LRCanTalon = new CANTalon(2);
+	  RFCanTalon = new CANTalon(3);
+	  RRCanTalon = new CANTalon(4);
+	  LSlaveCanTalon = new CANTalon(5);
+	  RSlaveCanTalon = new CANTalon(6);
+	  
+	  robotDrive = new RobotDrive(LFCanTalon, LRCanTalon, RFCanTalon, RRCanTalon);
+
+      // Initialize CAN Talons and write status to log so we can verify
+      // all the talons are connected.
+      InitializeCANTalon(LFCanTalon);
+      InitializeCANTalon(LRCanTalon);
+      InitializeCANTalon(RFCanTalon);
+      InitializeCANTalon(RRCanTalon);
+      InitializeCANTalon(LSlaveCanTalon);
+      InitializeCANTalon(RSlaveCanTalon);
+      
+      // Configure slave CAN Talons to follow the front L & R Talons.
+      LSlaveCanTalon.changeControlMode(TalonControlMode.Follower);
+      LSlaveCanTalon.set(LFCanTalon.getDeviceID());
+
+      RSlaveCanTalon.changeControlMode(TalonControlMode.Follower);
+      RSlaveCanTalon.set(RFCanTalon.getDeviceID());
+}
+
+  private void InitializePWMTalonDrive()
+  {
+	  Util.consoleLog();
+
+	  LFPwmTalon = new Talon(1);
+	  LRPwmTalon = new Talon(2);
+	  RFPwmTalon = new Talon(3);
+	  RRPwmTalon = new Talon(4);
+	  
+	  robotDrive = new RobotDrive(LFPwmTalon, LRPwmTalon, RFPwmTalon, RRPwmTalon);
+  }
+  
   // Initialize and Log status indication from CANTalon. If we see an exception
   // or a talon has low voltage value, it did not get recognized by the RR on start up.
   
-  public void initializeCANTalon(CANTalon talon)
+  private void InitializeCANTalon(CANTalon talon)
   {
 	  Util.consoleLog("talon init: %s   voltage=%.1f", talon.getDescription(), talon.getBusVoltage());
 

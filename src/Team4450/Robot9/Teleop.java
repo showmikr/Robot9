@@ -28,7 +28,7 @@ class Teleop
 
 		this.robot = robot;
 		
-		shifterValve = new FestoDA(1);
+		shifterValve = new FestoDA(0);
 		
 		shifterClose();
 	}
@@ -92,8 +92,6 @@ class Teleop
         // Motor safety turned on.
         robot.robotDrive.setSafetyEnabled(true);
         
-        robot.RFTalon.setEncPosition(0);
-        
 		// Driving loop runs until teleop is over.
 
 		while (robot.isEnabled() && robot.isOperatorControl())
@@ -113,13 +111,6 @@ class Teleop
 
 			robot.robotDrive.tankDrive(leftY * powerFactor, rightY * powerFactor);
 
-			//LCD.printLine(7, "penc=%d  pv=%d", robot.RFTalon.getPulseWidthPosition(), robot.RFTalon.getPulseWidthVelocity());
-			//LCD.printLine(8, "aenc=%d  av=%d", robot.RFTalon.getAnalogInPosition(), robot.RFTalon.getAnalogInVelocity());
-			LCD.printLine(9, "qenc=%d  qv=%d", robot.RFTalon.getEncPosition(), robot.RFTalon.getEncVelocity());
-			
-			LCD.printLine(10, "A=%b  B=%b  pot=%d  potv=%f  hes=%b", revBoard.getButtonA(), revBoard.getButtonB(), 
-					revBoard.getPotValue(), revBoard.getPot().getVoltage(), false); //, !hallEffectSensor.get());
-			
 			// End of driving loop.
 			
 			Timer.delay(.020);	// wait 20ms for update from driver station.
